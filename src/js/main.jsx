@@ -76,13 +76,14 @@ var Parkmap = React.createClass({
     return {
       marks: [],
       parks: [],
-      target: new GoogleMapsAPI.LatLng(34.393056, 132.465511),
       center: new GoogleMapsAPI.LatLng(34.393056, 132.465511),
       start_at: null,
       end_at: null
     };
   },
-
+  componentDidMount: function () {
+      handleSearch();
+  }
   handleSearch:  function() {
     ga('send', 'event', 'button', 'click', 'search');
     var that = this;
@@ -110,8 +111,8 @@ var Parkmap = React.createClass({
     };
     var data = {
       distance: 300,
-      longitude: this.state.target.F,
-      latitude: this.state.target.A,
+      longitude: this.state.center.F,
+      latitude: this.state.center.A,
       start_at: React.findDOMNode(this.refs.start_at).value,
       end_at: React.findDOMNode(this.refs.end_at).value
     };
@@ -131,15 +132,9 @@ var Parkmap = React.createClass({
   },
 
   handleCenterChange: function(e) {
-    this.setState({center: e.getCenter()});
-  },
-
-  handleClick: function(e) {
-    this.setState({target: e.latLng});
-  },
-
-  handleMarkerDrag: function(e) {
-    this.setState({target: e.latLng});
+    var center = e.getCenter();
+    this.setState({center: center});
+    this.handleSearch();
   },
 
   handleMarkerClick: function(park_id) {
@@ -258,9 +253,6 @@ var Parkmap = React.createClass({
       {list_button}
       <button className="location-button" onClick={this.handlePresentLocation}>        現在地
       </button>
-      <button className="search-button" onClick={this.handleSearch}>
-        検索
-      </button>
       <input className="search-start" type="datetime-local" ref="start_at" />
       <input className="search-end" type="datetime-local" ref="end_at" />
       <Map
@@ -272,7 +264,6 @@ var Parkmap = React.createClass({
         onClick={this.handleClick}
       >
         {message}
-        <Marker position={this.state.target} title={'目的地'} draggable={true} onDrag={this.handleMarkerDrag}/>
         {overlays}
       </Map>
       {this.state.is_display_list ? list_view : null}
